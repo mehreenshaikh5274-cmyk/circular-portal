@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Upload Circular</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            min-height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .upload-box {
+            width: 90%;
+            max-width: 500px;
+
+            background: #ffffff;
+
+            padding: 35px;
+
+            border-radius: 12px;
+
+            border-top: 5px solid #b8c9dc;
+
+            box-shadow: 0 5px 20px rgba(80, 100, 120, 0.10);
+        }
+
+        h2 {
+            text-align: center;
+
+            color: #40566d;
+
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        .description {
+            text-align: center;
+
+            color: #7b8794;
+
+            font-size: 14px;
+
+            margin-bottom: 28px;
+        }
+
+        .file-area {
+            border: 2px dashed #c9d6e4;
+
+            background: #f8fafc;
+
+            padding: 30px 20px;
+
+            border-radius: 10px;
+
+            text-align: center;
+
+            margin-bottom: 20px;
+        }
+
+        .file-area p {
+            color: #6b7b8c;
+
+            margin-top: 0;
+
+            font-size: 14px;
+        }
+
+        input[type="file"] {
+            width: 100%;
+
+            padding: 10px;
+
+            color: #52677b;
+
+            background: #ffffff;
+
+            border: 1px solid #d4dee8;
+
+            border-radius: 7px;
+        }
+
+        button {
+            width: 100%;
+
+            padding: 12px;
+
+            border: none;
+
+            border-radius: 7px;
+
+            background: #dce6f1;
+
+            color: #40566d;
+
+            font-size: 16px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #cdd9e6;
+        }
+
+        .error {
+            background: #f8e4e4;
+
+            color: #8a5555;
+
+            padding: 10px;
+
+            border-radius: 6px;
+
+            margin-bottom: 20px;
+
+            text-align: center;
+
+            font-size: 14px;
+        }
+
+        .logout {
+            display: block;
+
+            text-align: center;
+
+            margin-top: 20px;
+
+            color: #7b8794;
+
+            text-decoration: none;
+
+            font-size: 14px;
+        }
+
+        .logout:hover {
+            color: #40566d;
+
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="upload-box">
+
+        <h2>Upload Circular</h2>
+
+        <div class="description">
+            Select a PDF circular and upload it.
+        </div>
+
+        {% if error %}
+            <div class="error">
+                {{ error }}
+            </div>
+        {% endif %}
+
+        <form method="POST" enctype="multipart/form-data">
+
+            <div class="file-area">
+
+                <p>📄 Select PDF Circular</p>
+
+                <input
+                    type="file"
+                    name="circular"
+                    accept=".pdf"
+                    required
+                >
+
+            </div>
+
+            <button type="submit">
+                Upload
+            </button>
+
+        </form>
+
+        <a
+            class="logout"
+            href="{{ url_for('admin_logout') }}"
+        >
+            Logout
+        </a>
+
+    </div>
+
+</body>
+</html>
