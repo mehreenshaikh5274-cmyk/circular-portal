@@ -3,20 +3,25 @@ from werkzeug.utils import secure_filename
 from pathlib import Path
 from datetime import datetime
 import sqlite3
-import os
+
 
 app = Flask(__name__)
 
-# Secret key for manager login session
+# ---------------- SECRET KEY ----------------
+
 app.secret_key = "change-this-secret-key"
 
-# Folders and database
+
+# ---------------- FOLDERS AND DATABASE ----------------
+
 UPLOAD_FOLDER = Path("uploads")
 DATABASE = "circulars.db"
 
 UPLOAD_FOLDER.mkdir(exist_ok=True)
 
-# Manager login
+
+# ---------------- MANAGER LOGIN ----------------
+
 MANAGER_USERNAME = "SVPCET"
 MANAGER_PASSWORD = "SVPCET31"
 
@@ -24,6 +29,7 @@ MANAGER_PASSWORD = "SVPCET31"
 # ---------------- DATABASE ----------------
 
 def init_database():
+
     connection = sqlite3.connect(DATABASE)
 
     connection.execute("""
@@ -48,16 +54,20 @@ def home():
     connection.row_factory = sqlite3.Row
 
     circulars = connection.execute("""
-        SELECT * FROM circulars
+        SELECT *
+        FROM circulars
         ORDER BY upload_date DESC, id DESC
     """).fetchall()
 
     connection.close()
 
-    return render_template("index.html", circulars=circulars)
+    return render_template(
+        "index.html",
+        circulars=circulars
+    )
 
 
-# ---------------- OPEN CIRCULAR ----------------
+# ---------------- OPEN CIRCULAR PDF ----------------
 
 @app.route("/circular/<filename>")
 def open_circular(filename):
@@ -78,11 +88,16 @@ def admin_login():
         username = request.form.get("username")
         password = request.form.get("password")
 
-        if username == MANAGER_USERNAME and password == MANAGER_PASSWORD:
+        if (
+            username == MANAGER_USERNAME
+            and password == MANAGER_PASSWORD
+        ):
 
             session["manager_logged_in"] = True
 
-            return redirect(url_for("admin_upload"))
+            return redirect(
+                url_for("admin_upload")
+            )
 
         return render_template(
             "login.html",
@@ -98,48 +113,73 @@ def admin_login():
 def admin_upload():
 
     if not session.get("manager_logged_in"):
-        return redirect(url_for("admin_login"))
+
+        return redirect(
+            url_for("admin_login")
+        )
 
     if request.method == "POST":
 
         file = request.files.get("circular")
 
+        # Check file selected
         if not file or file.filename == "":
+
             return render_template(
                 "upload.html",
                 error="Please select a PDF file."
             )
 
-        # Only PDF files
+        # Check PDF
         if not file.filename.lower().endswith(".pdf"):
+
             return render_template(
                 "upload.html",
                 error="Only PDF files are allowed."
             )
 
-        filename = secure_filename(file.filename)
+        # Secure filename
+        filename = secure_filename(
+            file.filename
+        )
 
         # Save PDF
-        file.save(UPLOAD_FOLDER / filename)
+        file.save(
+            UPLOAD_FOLDER / filename
+        )
 
-        # Convert filename into display title
-        title = Path(filename).stem.replace("_", " ").replace("-", " ")
+        # Create title from filename
+        title = (
+            Path(filename)
+            .stem
+            .replace("_", " ")
+            .replace("-", " ")
+        )
 
-        # Today's date
-        upload_date = datetime.now().strftime("%Y-%m-%d")
+        # Current date
+        upload_date = datetime.now().strftime(
+            "%Y-%m-%d"
+        )
 
+        # Save details into database
         connection = sqlite3.connect(DATABASE)
 
         connection.execute("""
             INSERT INTO circulars
             (title, filename, upload_date)
             VALUES (?, ?, ?)
-        """, (title, filename, upload_date))
+        """, (
+            title,
+            filename,
+            upload_date
+        ))
 
         connection.commit()
         connection.close()
 
-        return redirect(url_for("home"))
+        return redirect(
+            url_for("home")
+        )
 
     return render_template("upload.html")
 
@@ -149,17 +189,24 @@ def admin_upload():
 @app.route("/admin/logout")
 def admin_logout():
 
-    session.pop("manager_logged_in", None)
+    session.pop(
+        "manager_logged_in",
+        None
+    )
 
-    return redirect(url_for("home"))
+    return redirect(
+        url_for("home")
+    )
+
+
+# ---------------- INITIALIZE DATABASE ----------------
+
+init_database()
 
 
 # ---------------- START APPLICATION ----------------
 
 if __name__ == "__main__":
-
-    init_database()
-
     app.run(
         host="0.0.0.0",
         port=5001,
